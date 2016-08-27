@@ -1,6 +1,8 @@
 --message box
 mb = { }
 local mbC = love.graphics.newCanvas(love.graphics.getWidth() * 2/3, love.graphics.getHeight()/2)
+mb.alpha = 0
+mb.tween = tween.new(0.8, mb, {alpha=255}, "inOutExpo")
 mbC:setFilter( "nearest", "nearest" )
 local titleF = newFont( "pixel", 32 )
 local bodyF = newFont( "pixel", 25 )
@@ -25,14 +27,21 @@ end
 
 function mb.drawMessage()
 	if MessageBoxShown then
-		love.graphics.setColor( 255, 255, 255, 225 )
+		love.graphics.setColor( 255, 255, 255, mb.alpha )
 		love.graphics.draw( mbC, 35, love.graphics.getHeight()* 1/4 )
 		love.graphics.setColor( 255, 255, 255 )
+	end
+end
+
+function mb.update( dt )
+	if MessageBoxShown then
+		local c = mb.tween:update( dt )
 	end
 end
 
 function mb.keyreleased( key )
 	if key == "return" or key == "escape" then
 		MessageBoxShown = false
+		mb.tween:reset()
 	end
 end

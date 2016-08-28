@@ -27,6 +27,7 @@ player = {
 	attackCooldown = 0,
 	canAttack = true,
 	coins = 0,
+	zooming = false,
 }
 
 local zoomin = tween.new( 0.3, player, {zoom=6}, "inOutExpo")
@@ -63,6 +64,10 @@ function player.update( dt )
 
 		if player.inv[1] and player.inv[1].type == "weapon" then
 			player.weapon = player.inv[1].weapon
+		end
+
+		if player.hp <= 0 then
+			gamestate = "Dead"
 		end
 
 		if zooming and canzoom then
@@ -124,11 +129,23 @@ function player.update( dt )
 
 		end
 
+		if player.y < -800 then
+			player.y = -800
+		elseif player.y > 800 then
+			player.y = 800
+		end
+		if player.x < -800 then
+			player.x = -800
+		elseif player.x > 800 then
+			player.x = 800
+		end
+
 		if player.canMove then
 			camera.x = player.x*player.zoom - love.graphics.getWidth()/2 + (player.w*player.zoom)/2
 			camera.y = player.y*player.zoom - love.graphics.getHeight()/2 + (player.h*player.zoom)/2
 		end
 		if findingto then
+			player.zooming = true
 			canzoom = false
 			local complete = findto:update( dt )
 			if complete then
@@ -154,6 +171,8 @@ function player.update( dt )
 				player.canMove = true
 				findback:reset()
 				findto:reset()
+
+				player.zooming = false
 				canzoom = true
 			end
 		end
@@ -197,7 +216,10 @@ function player.keyreleased( key )
 	if key == controls.zoom then
 		zooming = true
 	elseif key == "space" then
-		--aihandler.new( {x=player.x + math.random(-100, 100), y=player.y + math.random(-100, 100)})
+		print( player.x, player.y )
+	elseif key == "tab" then
+		UI.show()
+	elseif key == "b" then
 	end
 end
 wgx, wgy, wgw, wgh = 0,0,0,0

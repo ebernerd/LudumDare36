@@ -231,6 +231,7 @@ function aihandler.draw()
 end
 
 function aihandler.new( data )
+	print( debug.traceback() )
 	return ai:new( data )
 end
 

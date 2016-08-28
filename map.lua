@@ -12,10 +12,12 @@ map.world = {
 local commonloot = {
 	"Short Sword",
 	"Healing Potion",
-	"Coins"
+	"Healing Potion",
+	"Coins",
+	"Coins",
 }
 local uncommonloot = {
-	"Long Sword",
+	"Coins",
 	"Revive",
 	"Coins"
 }
@@ -57,16 +59,23 @@ local messages = {
 Vocab = { }
 Vocab.unknown = {
 	["kwerzcyka"] = "light",
-	--[=[["amorella"] = "beam",
+	["amorella"] = "beam",
 	["grentabulaa"] = "sky",
-	["onovello"] = "dark",
+	
 	["fendikila"] = "wet",
-	["kellczya"] = "Kelzian",
-	["kellczyi"] = "Kelzi",--]=]
+	["Kellczya"] = "Kelzian",
+	["Kellczyi"] = "Kelzi",
+	["onovello"] = "dark",
+	["buro"] = "fall",
+	["andobikulo"] = "alone"
 }
-Vocab.known = { }
+Vocab.known = {  }
 Vocab.pages = {
-	["kwerzcyka"] = "Stories go on and on about a forever dimming 'kwerzycka', whatever that was. You read on and find that the world was removed of it's 'kwerzycka', where no one was able to see themselves, or their future.\n\n\nYou've learned the Kelzi word for 'light'."
+	["kwerzcyka"] = "Stories go on and on about a forever dimming 'kwerzycka', whatever that was. You read on and find that the world was removed of it's 'kwerzycka', where no one was able to see themselves, or their future.\n\n\nYou've learned the Kelzi word for 'light'.\n\n\nPress return or escape",
+	["amorella"] = "The tattered pages explain a world of hope, dreams, and adventure, before... well, the page is ripped past there. We'll have to find that out another day.\n\n\nYou've learned the Kelzi word for 'beam'.\n\n\nPress return or escape",
+	["grentabulaa"] = "This book goes on and on about this... thing, opening up peoples lives, until it itself opened up and ruined everyone's hopes and dreams. Lives were destroyed.\n\n\nYou've learned the Kelzi word for 'sky'.\n\n\nPress return or escape",
+	["onovello"] = "Fables go on about, how, in small doses, 'onovello' is good for the soul. This does not include, however, the terrible darkness that the world has been plagued into.\n\n\nYou've learned the Kelzi word for 'dark'.\n\n\nPress return or escape",
+	["other"] = "I stare upon the pages and read about an ancient people, and their fantastic world. Fantastic, that is, until the day it all changed, where stories go from happy to incredibly dark. One can only imagine their torment.\n\n\nYou've learned the Kelzi word for ",
 }
 
 
@@ -139,17 +148,21 @@ local function makedraworder()
 	table.sort( map.world.mg, function(a, b) return a.y < b.y end)
 end
 
-function getPos(x,y,l)
+function getPos(x,y,l,np)
 	local x = x or love.math.random( -50, 50 )*16
 	local y = y or love.math.random( -50, 50 )*16
 	local layer = l or "mg"
-	for _, l in pairs( map.world ) do
-		for i, v in pairs( l ) do
-			if v then
-				--print( v.x == x and v.y == y )
-				if layer == v.layer and v.x == x and v.y == y then
-					print('[map] Avoided collision')
-					getPos()
+	local dist = math.abs(math.sqrt((y-player.y)^2 + (x-player.x)^2))
+	if dist < 100 and np then
+		x, y = getPos()
+	else
+		for _, l in pairs( map.world ) do
+			for i, v in pairs( l ) do
+				if v then
+					--print( v.x == x and v.y == y )
+					if layer == v.layer and v.x == x and v.y == y then
+						x, y = getPos()
+					end
 				end
 			end
 		end
@@ -183,7 +196,7 @@ end
 
 local function gen( area )
 	if area == "overworld" then
-		genBackdrop()
+		--genBackdrop()
 		print( "[map] Generating level \"" .. area .. "\"..." )
 		for i = 1, love.math.random( 2500, 2800 ) do
 			local haspos = false
@@ -195,38 +208,131 @@ local function gen( area )
 				h = 6,
 			}})
 		end
-		--[=[for i = 1, love.math.random( 100, 150 ) do
+
+
+
+		for i = 1, love.math.random( 5, 7 ) do
 			local x, y = getPos()
-			worlditem:new( {x=x*16,y=y*16,name="flower", layer="bg", img="g/textures/flower"..tostring(love.math.random(1,2))})
-		end--]=]
-		for i = 1, 2 do
-			local haspos = false
-			local x, y = getPos()
-			for i = 1, love.math.random( 10, 14 ) do
-				aihandler.new( {name="soldier"..love.math.random(1,2),x=x+love.math.random(-4, 4)*16, y = y+love.math.random(-4,4)*16})
-			end
-			worlditem:new( {x=x,y=y, name="relic", anim=RelicAnim, animated = true, found=false,
-			update = function( self, dt )
-				if player.x < self.x + self.w + 100 and player.x + player.w > self.x - 100 and player.y < self.y + self.h + 100 and player.y + player.h > self.y - 100 then
-					if not self.found then
-						self.found = true
-						player.find( self )
-						chordtimer = 0
-						chordwait = love.math.random( 15, 30 )
-						player.canMove = false
+			worlditem:new( {cost=10,x=x,y=y,name="summonstone", anim=SSAnim, animated=true,
+				onclick = function(self)
+					if player.coins >=  self.cost then
+						player.coins = player.coins - self.cost
+						self.cost = self.cost + 5
+						sounds["coin"]:stop()
+						sounds["coin"]:play()
+						aihandler.new( {name="soldier"..love.math.random(1,2),x = self.x + love.math.random(-2,2)*player.zoom, y=self.y + love.math.random(-2,2)*player.zoom})
+						notif.new(self.x-30, self.y, "Summoning...", {255, 255, 255}, 8)
+					else
+						notif.new(self.x-45, self.y, "Not enough money", {255, 255, 255}, 8)
+						sounds['nomoney']:stop()
+						sounds['nomoney']:play()
 					end
 				end
-			end
 			})
 		end
-		for i = 1, love.math.random(10,15) do
+
+
+		--Spawn Rain Stone first
+		local x, y = getPos()
+		for i = 1, love.math.random( 10, 14 ) do
+			aihandler.new( {name="soldier"..love.math.random(1,2),x=x+love.math.random(-4, 4)*16, y = y+love.math.random(-4,4)*16})
+		end
+		worlditem:new( {x=x,y=y, name="relic", anim=RelicAnim, animated = true, found=false,
+		update = function( self, dt )
+			if player.x < self.x + self.w + 100 and player.x + player.w > self.x - 100 and player.y < self.y + self.h + 100 and player.y + player.h > self.y - 100 then
+				if not self.found then
+					self.found = true
+					player.find( self )
+					chordtimer = 0
+					chordwait = love.math.random( 15, 30 )
+					player.canMove = false
+				end
+			end
+		end,
+		onclick = function( self )
+			local str = ""
+			local words = {
+				"buro",
+				"fendikila",
+				"onovello",
+				"andobikulo",
+				"Kellczya",
+			}
+			local l = 0
+			for i, v in pairs( words ) do
+				if Vocab.known[v] then
+					l = l + 1
+					str = str .. Vocab.known[v]:upper() .. "\n"
+				else
+					str = str .. v .. "\n"
+				end
+			end
+			if l ~= #words then
+				str = str.."\n\nYou have not learned enough to unlock this stone yet. Go learn more.\n\nPress return or esacpe"
+
+			mb.showMessage( "Words learned: " .. l .. "/" .. #words, str )
+			else
+				mb.showMessage( "Curse lifted!", "A loud rumble of thunder rolls through, and then suddenly, it stops. You've undone one of the eternal curses!\n\n\nPress return or escape" )
+				Curse1 = false
+				sounds["rainloop"]:stop()
+				sounds["windloop"]:stop()
+			end
+		end
+		})
+		x, y = getPos()
+		for i = 1, love.math.random( 10, 14 ) do
+			aihandler.new( {name="soldier"..love.math.random(1,2),x=x+love.math.random(-4, 4)*16, y = y+love.math.random(-4,4)*16})
+		end
+		worlditem:new( {x=x,y=y, name="relic", anim=RelicAnim, animated = true, found=false,
+		update = function( self, dt )
+			if player.x < self.x + self.w + 100 and player.x + player.w > self.x - 100 and player.y < self.y + self.h + 100 and player.y + player.h > self.y - 100 then
+				if not self.found then
+					self.found = true
+					player.find( self )
+					chordtimer = 0
+					chordwait = love.math.random( 15, 30 )
+					player.canMove = false
+				end
+			end
+		end,
+		onclick = function( self )
+			local str = ""
+			local words = {
+				"onovello",
+				"kwerzcyka",
+				"grentabulaa",
+				"Kellczyi",
+				"Kellczya",
+			}
+			local l = 0
+			for i, v in pairs( words ) do
+				if Vocab.known[v] then
+					l = l + 1
+					str = str .. Vocab.known[v]:upper() .. "\n"
+				else
+					str = str .. v .. "\n"
+				end
+			end
+			if l ~= #words then
+				str = str.."\n\nYou have not learned enough to unlock this stone yet. Go learn more.\n\nPress return or esacpe"
+
+				mb.showMessage( "Words learned: " .. l .. "/" .. #words, str )
+			else
+				mb.showMessage( "Curse lifted!", "Something you've not seen in YEARS - a sunrise. You've undone one of the eternal curses!\n\n\nPress return or escape" )
+				Curse2 = false
+			end
+		end
+		})
+
+		for i = 1, love.math.random(9,12) do
 			local haspos = false
-			local x, y = getPos()
-			worlditem:new( {x=x,y=y, name="book", anim=BookAnim, animated = true, found=false,
+			local x, y = getPos(nil,nil,nil,true)
+			worlditem:new( {cost=100,x=x,y=y, name="book", anim=BookAnim, animated = true, found=false,
 			onclick = function( self )
 
-				if player.coins >= 100 then
-					player.coins = player.coins - 100
+				if player.coins >= self.cost then
+					player.coins = player.coins - self.cost
+					self.cost = self.cost + 50
 					sounds["coin"]:stop()
 					sounds["coin"]:play()
 					local r = love.math.random(1,#Vocab.unknown)
@@ -236,7 +342,12 @@ local function gen( area )
 						if c == r then
 							Vocab.unknown[i] = nil
 							Vocab.known[i] = v
-							mb.showMessage( "You read the ancient book...", Vocab.pages[i] )
+							print( table.serialize( Vocab.known ) )
+							local info = Vocab.pages[i] or Vocab.pages["other"]
+							if info == Vocab.pages['other'] then
+								info = info .. "'" .. v .. "'.\n\n\nPress return or escape"
+							end
+							mb.showMessage( "You read the ancient book...", info )
 							break
 						end
 					end
@@ -280,8 +391,10 @@ local function gen( area )
 								coinage =  love.math.random(25,40)
 								player.coins = player.coins + coinage
 							end
-							if loot == "Health Potion" then
-								player.hp = player.hp + love.math.random( 10, 20 )
+							if loot == "Healing Potion" then
+								local buff = love.math.random( 25, 35 )
+								player.hp = player.hp + buff
+								notif.new(player.x, player.y, "+" .. buff, { 0, 255, 0 } )
 								if player.hp > 100 then player.hp = 100 end
 							end
 						elseif value > 50 and value < 95 then
@@ -364,7 +477,9 @@ end
 
 function map.mousereleased( x, y, button )
 	for i, v in pairs( map.world.mg ) do
-		if v.mousereleased then v:mousereleased( x, y, button ) end
+		if not player.zooming then
+			if v.mousereleased then v:mousereleased( x, y, button ) end
+		end
 	end
 end
 

@@ -21,6 +21,13 @@ local function drawHotbar()
 	love.graphics.rectangle( "line", centerx+(bigbox/2)+5, 10+(bigbox/8), smallbox, smallbox )
 	love.graphics.rectangle( "line", centerx-(bigbox/2), 10, bigbox, bigbox )
 	love.graphics.printf( "Coins: " .. player.coins, 0, 0, love.graphics.getWidth(), "right" )
+	if player.inv[1] then
+		love.graphics.draw( textures[player.inv[1].tooltip], centerx-bigbox/2, 12 )
+	end
+	love.graphics.setColor( 255, 0, 0, UI.alpha )
+	love.graphics.rectangle( "line", 10, 10, 120, 40 )
+	love.graphics.rectangle( "fill", 20, 20, 100*(player.hp/100), 20 )
+	love.graphics.setColor( 255, 255, 255 )
 end
 
 function UI.update( dt )

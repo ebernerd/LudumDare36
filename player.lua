@@ -197,7 +197,7 @@ function player.keyreleased( key )
 	if key == controls.zoom then
 		zooming = true
 	elseif key == "space" then
-		aihandler.new( {x=player.x + math.random(-100, 100), y=player.y + math.random(-100, 100)})
+		--aihandler.new( {x=player.x + math.random(-100, 100), y=player.y + math.random(-100, 100)})
 	end
 end
 wgx, wgy, wgw, wgh = 0,0,0,0
@@ -230,7 +230,6 @@ function player.attack( dir )
 			wgx = player.x + player.w + player.weapon.range
 			wgy = player.y
 		end
-		print( wgx, wgy, wgw+wgx, wgh+wgy )
 
 		local items, len = world:queryRect(wgx, wgy, wgw, wgh, function() return "slide" end )
 		if len > 0 then

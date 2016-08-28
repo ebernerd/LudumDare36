@@ -134,7 +134,7 @@ function player.update( dt )
 			if complete then
 				findingt = true
 				findingto = false
-				sounds['found-item']:play()
+				sounds['chord'..tostring(love.math.random(1,4))]:play()
 			end
 		end
 		if findingt then
@@ -202,7 +202,7 @@ function player.keyreleased( key )
 end
 wgx, wgy, wgw, wgh = 0,0,0,0
 function player.attack( dir )
-	if player.canAttack then
+	if player.canAttack and player.canMove then
 		player.canAttack = false
 		wgw, wgh = player.weapon.range, player.weapon.range
 		if dir == "top" then

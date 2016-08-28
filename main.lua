@@ -47,8 +47,8 @@ RelicAnim = Animations.new( {
 	"anim/relic/relic1",
 }, 0.1, "Game" )
 ComputerAnim = Animations.new( {
-	"anim/computer/1",
-	"anim/computer/2",
+	"m/computer/1",
+	"m/computer/2",
 }, 0.4, "Game")
 BookAnim = Animations.new( {
 	"/anim/book/book0000",

@@ -57,14 +57,17 @@ local messages = {
 Vocab = { }
 Vocab.unknown = {
 	["kwerzcyka"] = "light",
-	["amorella"] = "beam",
+	--[=[["amorella"] = "beam",
 	["grentabulaa"] = "sky",
 	["onovello"] = "dark",
 	["fendikila"] = "wet",
 	["kellczya"] = "Kelzian",
-	["kellczyi"] = "Kelzi",
+	["kellczyi"] = "Kelzi",--]=]
 }
 Vocab.known = { }
+Vocab.pages = {
+	["kwerzcyka"] = "Stories go on and on about a forever dimming 'kwerzycka', whatever that was. You read on and find that the world was removed of it's 'kwerzycka', where no one was able to see themselves, or their future.\n\n\nYou've learned the Kelzi word for 'light'."
+}
 
 
 
@@ -182,7 +185,7 @@ local function gen( area )
 	if area == "overworld" then
 		genBackdrop()
 		print( "[map] Generating level \"" .. area .. "\"..." )
-		for i = 1, love.math.random( 1000, 1100 ) do
+		for i = 1, love.math.random( 2500, 2800 ) do
 			local haspos = false
 			local x, y = getPos()
 			worlditem:new( {x=x,y=y,name="tree", img="g/textures/tree"..tostring(love.math.random(1,2)), hascolliders = true, col={
@@ -200,7 +203,7 @@ local function gen( area )
 			local haspos = false
 			local x, y = getPos()
 			for i = 1, love.math.random( 10, 14 ) do
-				aihandler.new( {x=x+love.math.random(-4, 4)*16, y = y+love.math.random(-4,4)*16})
+				aihandler.new( {name="soldier"..love.math.random(1,2),x=x+love.math.random(-4, 4)*16, y = y+love.math.random(-4,4)*16})
 			end
 			worlditem:new( {x=x,y=y, name="relic", anim=RelicAnim, animated = true, found=false,
 			update = function( self, dt )
@@ -226,10 +229,25 @@ local function gen( area )
 					player.coins = player.coins - 100
 					sounds["coin"]:stop()
 					sounds["coin"]:play()
+					local r = love.math.random(1,#Vocab.unknown)
+					local c = 0
+					for i, v in pairs(Vocab.unknown) do
+						c = c + 1
+						if c == r then
+							Vocab.unknown[i] = nil
+							Vocab.known[i] = v
+							mb.showMessage( "You read the ancient book...", Vocab.pages[i] )
+							break
+						end
+					end
 					--What word are we learning?
-					UI.show()
-				end
 
+					UI.show()
+				else
+					notif.new(self.x-45, self.y, "Not enough money", {255, 255, 255}, 8)
+					sounds['nomoney']:stop()
+					sounds['nomoney']:play()
+				end
 			end,
 			update = function( self, dt )
 				if player.x < self.x + self.w + 100 and player.x + player.w > self.x - 100 and player.y < self.y + self.h + 100 and player.y + player.h > self.y - 100 then
@@ -244,7 +262,7 @@ local function gen( area )
 			end
 			})
 		end
-		for i = 1, math.random(80, 100) do 
+		for i = 1, love.math.random(80, 100) do 
 			local x, y = getPos()
 			worlditem:new( {x=x,y=y, name="crate", img="g/textures/crate", w=11,h=11,found=false,
 			update = function( self, dt )

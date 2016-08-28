@@ -14,7 +14,7 @@ local ai = {
 	speed = 14,
 	xvel = 0,
 	yvel = 0,
-	name = "soldier",
+	name = "soldier1",
 	hp = 50,
 	maxhp = 50,
 	dir = "right",
@@ -209,15 +209,24 @@ function ai:mousereleased( x, y )
 
 end
 
+local maxaicount = 35
+
 function aihandler.update( dt )
+	if #ais < maxaicount then
+		ai.new( {x = love.math.random(-50, 50)*16, y = love.math.random(-50,50)*16, name="soldier"..love.math.random(1,2)})
+	end
 	for i, v in pairs( ais ) do
-		if v.update then v:update( dt ) end
+		--if v.x > camera.x and v.x < camera.x + love.graphics.getWidth() and v.y > camera.y and v.y <= camera.y + love.graphics.getHeight() then
+			if v.update then v:update( dt ) end
+		--end
 	end
 end
 
 function aihandler.draw()
 	for i, v in pairs( ais ) do
-		if v.draw then v:draw() end
+		--if v.x > camera.x*player.zoom and v.x < camera.x*player.zoom + love.graphics.getWidth() and v.y > camera.y*player.zoom and v.y <= camera.y*player.zoom + love.graphics.getHeight() then
+			if v.draw then v:draw() end
+		--end
 	end
 end
 

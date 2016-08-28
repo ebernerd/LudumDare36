@@ -1,5 +1,6 @@
 --message box
 mb = { }
+local hasshown = false
 local mbC = love.graphics.newCanvas(love.graphics.getWidth() * 2/3, love.graphics.getHeight()/2)
 mb.alpha = 0
 mb.tween = tween.new(0.8, mb, {alpha=255}, "inOutExpo")
@@ -8,7 +9,7 @@ local titleF = newFont( "pixel", 32 )
 local bodyF = newFont( "pixel", 25 )
 MessageBoxShown = false
 function mb.showMessage( title, message, options, optkeys )
-
+	hasshown = true
 	love.graphics.setCanvas( mbC )
 		love.graphics.setLineWidth( 2 )
 		love.graphics.setColor( 70, 90, 107 )
@@ -42,6 +43,8 @@ end
 function mb.keyreleased( key )
 	if key == "return" or key == "escape" then
 		MessageBoxShown = false
-		mb.tween:reset()
+		if hasshown then
+			mb.tween:reset()
+		end
 	end
 end
